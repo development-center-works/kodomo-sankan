@@ -4,7 +4,7 @@
 ## 概要
 2025年8月8日(金) エネコムこども参観日のプログラミング体験でチャレンジしていただいたゲームです。
 
-Blockly(https://developers.google.com/blockly)を利用し作成しています。
+Blockly (https://developers.google.com/blockly) を利用し作成しています。
 
 ## ディレクトリ構成
 ```
