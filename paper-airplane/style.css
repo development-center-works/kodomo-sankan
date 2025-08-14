@@ -1,0 +1,1343 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #87CEEB, #E0F6FF);
+    min-height: 100vh;
+    padding: 20px;
+    /* zoom: 150%; を削除してBlocklyの問題を回避 */
+}
+
+.container {
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: #2c5aa0;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.game-area {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.blockly-section,
+.game-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    /* 内容に合わせて高さを調整 */
+}
+
+.game-header {
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    margin-bottom: 15px;
+    position: relative !important;
+}
+
+.game-header h2 {
+    margin: 0 !important;
+    flex: unset !important;
+    /* ← flexの影響を完全解除 */
+    width: auto !important;
+    text-align: left !important;
+}
+
+
+.audio-controls button {
+    background: #007bff !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    overflow: hidden !important;
+    aspect-ratio: 1 / 1 !important;
+}
+
+/* 具体的にミュートボタンを指定 */
+#soundToggleButton,
+#bgmToggleButton {
+    background: #007bff !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    overflow: hidden !important;
+    aspect-ratio: 1 / 1 !important;
+}
+
+.audio-controls button:hover {
+    background: #0056b3;
+}
+
+/* ヒントボタンのスタイル */
+.hint-button {
+    background: #FFA500 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 6px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    margin-left: 8px !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    vertical-align: middle !important;
+}
+
+.hint-button:hover {
+    background: #FF8C00 !important;
+    transform: scale(1.05) !important;
+}
+
+.hint-content {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.hint-content ul {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.hint-content li {
+    margin-bottom: 4px;
+}
+
+.volume-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 50px;
+    right: 0;
+    z-index: 15;
+    min-width: 200px;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    justify-content: space-between;
+}
+
+.volume-control label {
+    font-weight: bold;
+    color: #333;
+    min-width: 100px;
+    font-size: 14px;
+}
+
+.volume-control input[type="range"] {
+    width: 120px;
+    margin-left: 10px;
+}
+
+.volume-control input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.volume-control input[type="range"]::-webkit-slider-track {
+    width: 100%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+}
+
+.volume-control input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+/* ステージ情報エリア */
+.stage-info-area {
+    margin-left: 50px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stage-current {
+    font-size: 16px;
+    font-weight: bold;
+    color: #2c5aa0;
+    background: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 2px solid #4CAF50;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.stage-skip-btn {
+    background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(156, 39, 176, 0.3);
+}
+
+.stage-skip-btn:hover {
+    background: linear-gradient(45deg, #7B1FA2, #4A148C);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+}
+
+.stage-skip-btn:active {
+    transform: translateY(0);
+}
+
+/* Blockly専用の調整 */
+.blockly-section {
+    overflow: hidden;
+    /* スケール時のはみ出しを防ぐ */
+    height: fit-content;
+    /* 667px + ボタンスペース + マージン */
+    display: flex;
+    flex-direction: column;
+}
+
+h2 {
+    color: #2c5aa0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+#blocklyDiv {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: white;
+}
+
+/* Blocklyフォントサイズを見た目上維持するための補正 */
+#blocklyDiv .blocklyText,
+#blocklyDiv .blocklyEditableText,
+#blocklyDiv text,
+#blocklyDiv .blocklyHtmlInput,
+#blocklyDiv input {
+    font-size: 18pt !important;
+    /* コードブロックの文字サイズを18ポイントに設定 */
+    font-family: Arial, sans-serif !important;
+}
+
+.blocklyToolboxDiv .blocklyText {
+    font-size: 21px !important;
+    /* 元のサイズに戻す */
+}
+
+/* ツールボックスのカテゴリ名のみフォントサイズを30%増加 */
+.blocklyTreeLabel,
+.blocklyToolboxCategory .blocklyTreeLabel,
+.blocklyTreeRow .blocklyTreeLabel {
+    font-size: 27px !important;
+    /* カテゴリ名「紙飛行機」「ループ」「数学」「変数」のみ30%増加 */
+    font-family: Arial, sans-serif !important;
+}
+
+/* より具体的なカテゴリセレクタ */
+.blocklyToolboxDiv .blocklyTreeRow[aria-label*="紙飛行機"] .blocklyText,
+.blocklyToolboxDiv .blocklyTreeRow[aria-label*="ループ"] .blocklyText,
+.blocklyToolboxDiv .blocklyTreeRow[aria-label*="数学"] .blocklyText,
+.blocklyToolboxDiv .blocklyTreeRow[aria-label*="変数"] .blocklyText {
+    font-size: 27px !important;
+    /* 特定カテゴリのみ30%増加 */
+}
+
+.controls {
+    margin-top: 10px;
+    /* スケール補正後の適切なマージン */
+    display: grid;
+    grid-template-columns: repeat(3, 110px);
+    grid-template-rows: auto auto auto;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    /* フレックスで縮小されないようにする */
+    position: relative;
+    /* ポジション調整のため */
+}
+
+button {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 10px 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+    white-space: nowrap;
+    min-width: 110px;
+    width: 110px;
+    text-align: center;
+}
+
+/* ボタンのグリッド位置指定 */
+#runButton {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+#resetButton {
+    grid-column: 2;
+    grid-row: 1;
+    background: linear-gradient(45deg, #f44336, #da190b);
+    box-shadow: 0 3px 10px rgba(244, 67, 54, 0.3);
+}
+
+#stopLoopButton {
+    grid-column: 3;
+    grid-row: 1;
+    background: linear-gradient(45deg, #FF9800, #F57C00);
+    box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+}
+
+#stopLoopButton:hover {
+    background: linear-gradient(45deg, #F57C00, #E65100);
+}
+
+#helpButton {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+#tutorialButton {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+
+
+#stageStartButton {
+    background: #4CAF50;
+    grid-column: 3;
+    grid-row: 2;
+    color: white;
+    font-weight: bold;
+}
+
+#stageStartButton:hover {
+    background: #45a049;
+}
+
+#stageResetButton {
+    background: #FF5722;
+    grid-column: 3;
+    grid-row: 2;
+    color: white;
+    font-weight: bold;
+}
+
+#stageResetButton:hover {
+    background: #E64A19;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+#resetButton:hover {
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+}
+
+#gameCanvas {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+    display: block;
+    margin: 0 auto;
+}
+
+.game-info {
+    margin-top: 15px;
+}
+
+.parameter-display {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.parameter-display div {
+    text-align: center;
+    font-weight: bold;
+    color: #2c5aa0;
+    padding: 10px;
+    background: #f0f8ff;
+    border-radius: 5px;
+}
+
+.parameter-display span {
+    color: #e74c3c;
+    font-size: 1.2em;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .game-area {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+        max-width: none;
+    }
+
+    .controls button {
+        width: 100% !important;
+        min-width: auto;
+        padding: 12px 20px;
+        font-size: 15px;
+        grid-column: unset;
+        grid-row: unset;
+    }
+
+    #soundToggleButton,
+    #bgmToggleButton {
+        width: 36px !important;
+        height: 36px !important;
+        align-self: center;
+        font-size: 14px;
+        border-radius: 50% !important;
+    }
+
+    #gameCanvas {
+        width: 100%;
+        height: auto;
+    }
+
+    .parameter-display {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+}
+
+/* より小さな画面での調整 */
+@media (max-width: 480px) {
+    .controls {
+        gap: 6px;
+    }
+
+    .controls button {
+        padding: 10px 16px;
+        font-size: 13px;
+        min-width: 100px;
+        width: 100% !important;
+    }
+
+    h1 {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+    }
+
+    .game-area {
+        padding: 15px;
+    }
+}
+
+/* アニメーション */
+@keyframes fly {
+    0% {
+        transform: translateX(0) translateY(0) rotate(0deg);
+    }
+
+    100% {
+        transform: translateX(500px) translateY(200px) rotate(360deg);
+    }
+}
+
+.airplane-flying {
+    animation: fly 2s ease-out;
+}
+
+/* ヘルプモーダルのスタイル */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 2% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease-out;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #4834d4, #686de0);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.8em;
+    color: white;
+}
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #ffeb3b;
+    text-decoration: none;
+}
+
+.modal-body {
+    padding: 30px;
+    line-height: 1.6;
+}
+
+.modal-footer {
+    padding: 20px 30px;
+    background: #f8f9fa;
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.modal-button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.modal-button.primary {
+    background: #4CAF50;
+    color: white;
+}
+
+.modal-button.primary:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+
+.modal-button.secondary {
+    background: #9E9E9E;
+    color: white;
+}
+
+.modal-button.secondary:hover {
+    background: #757575;
+}
+
+#bgmInitModal label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#bgmInitModal input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.help-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.help-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.help-section h3 {
+    color: #2c5aa0;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.block-category {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9ff;
+    border-radius: 8px;
+    border-left: 4px solid #4834d4;
+}
+
+.block-category h4 {
+    color: #4834d4;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.help-section ul,
+.help-section ol {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.help-section li {
+    margin-bottom: 8px;
+}
+
+.help-section li ul {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.help-section p {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.help-section strong {
+    color: #2c5aa0;
+}
+
+.help-subsection {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-left: 4px solid #4CAF50;
+    border-radius: 5px;
+}
+
+.help-subsection h4 {
+    margin: 0 0 10px 0;
+    color: #2c5aa0;
+    font-size: 16px;
+}
+
+.help-subsection ul {
+    margin: 0;
+}
+
+#helpButton {
+    background: linear-gradient(135deg, #27ae60, #2ed573);
+    border: none;
+    color: white;
+    padding: 10px 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(39, 174, 96, 0.3);
+    white-space: nowrap;
+    min-width: 110px;
+    width: 110px;
+    text-align: center;
+}
+
+#helpButton:hover {
+    background: linear-gradient(135deg, #219a52, #26c465);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* レスポンシブデザイン（ヘルプモーダル用） */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+        max-height: 85vh;
+    }
+
+    .modal-header {
+        padding: 15px 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 1.5em;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-button {
+        width: 100%;
+        padding: 15px 20px;
+        font-size: 16px;
+    }
+
+    .help-section h3 {
+        font-size: 1.2em;
+    }
+
+    .block-category {
+        padding: 10px;
+    }
+}
+
+/* チュートリアルモーダルのスタイル */
+.tutorial-modal {
+    max-width: 900px;
+}
+
+.tutorial-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#tutorialStep {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.tutorial-close {
+    margin-left: auto;
+}
+
+#tutorialContent {
+    min-height: 400px;
+    padding: 20px;
+    background: #f8f9ff;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    border-left: 4px solid #4834d4;
+}
+
+.tutorial-step {
+    text-align: center;
+}
+
+.tutorial-step h3 {
+    color: #2c5aa0;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.tutorial-step p {
+    color: #555;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.tutorial-image {
+    width: 100%;
+    max-width: 500px;
+    height: 200px;
+    background: #e8f4fd;
+    border: 2px dashed #4834d4;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    font-size: 18px;
+    color: #4834d4;
+    font-weight: bold;
+}
+
+.tutorial-highlight {
+    background: linear-gradient(135deg, #ffeb3b, #ffc107);
+    color: #333;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border-left: 4px solid #ff9800;
+}
+
+.tutorial-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.tutorial-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s;
+    min-width: 120px;
+}
+
+#tutorialPrev {
+    background: #6c757d;
+    color: white;
+}
+
+#tutorialPrev:hover:not(:disabled) {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+#tutorialPrev:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#tutorialNext {
+    background: linear-gradient(135deg, #4834d4, #686de0);
+    color: white;
+}
+
+#tutorialNext:hover {
+    background: linear-gradient(135deg, #3742c7, #5b63d4);
+    transform: translateY(-2px);
+}
+
+.tutorial-complete {
+    background: linear-gradient(135deg, #27ae60, #2ed573);
+    color: white;
+    flex: 1;
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+.tutorial-complete:hover {
+    background: linear-gradient(135deg, #219a52, #26c465);
+    transform: translateY(-2px);
+}
+
+#tutorialButton {
+    background: linear-gradient(135deg, #e67e22, #f39c12);
+    border: none;
+    color: white;
+    padding: 10px 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(230, 126, 34, 0.3);
+    white-space: nowrap;
+    min-width: 110px;
+    width: 110px;
+    text-align: center;
+}
+
+#tutorialButton:hover {
+    background: linear-gradient(135deg, #d35400, #e67e22);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
+}
+
+.tutorial-block-example {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    font-family: monospace;
+    font-size: 14px;
+    color: #333;
+}
+
+.tutorial-tip {
+    background: #e8f5e8;
+    border: 1px solid #27ae60;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 20px 0;
+    color: #2d5a2d;
+}
+
+.tutorial-tip::before {
+    content: "💡 ";
+    font-size: 16px;
+}
+
+/* レスポンシブデザイン（チュートリアル用） */
+@media (max-width: 768px) {
+    .tutorial-modal {
+        width: 95%;
+    }
+
+    .tutorial-nav {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .tutorial-close {
+        margin: 0;
+    }
+
+    #tutorialContent {
+        min-height: 300px;
+        padding: 15px;
+    }
+
+    .tutorial-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .tutorial-btn {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .tutorial-complete {
+        max-width: none;
+    }
+}
+
+/* インタラクティブガイドのスタイル */
+.interactive-guide {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 320px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    animation: slideInRight 0.3s ease-out;
+    border: 2px solid #4CAF50;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
+
+.guide-content {
+    padding: 20px;
+}
+
+.guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.guide-step {
+    background: #4CAF50;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.guide-close-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    min-width: unset;
+    box-shadow: none;
+}
+
+.guide-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c5aa0;
+    margin-bottom: 10px;
+}
+
+.guide-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.guide-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.guide-btn {
+    flex: 1;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-width: unset;
+    width: auto;
+}
+
+.guide-prev {
+    background: #6c757d;
+    color: white;
+}
+
+.guide-prev:hover:not(:disabled) {
+    background: #5a6268;
+}
+
+.guide-prev:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.guide-next {
+    background: #4CAF50;
+    color: white;
+}
+
+.guide-next:hover {
+    background: #45a049;
+}
+
+.guide-complete {
+    background: #ff9800;
+    color: white;
+}
+
+.guide-complete:hover {
+    background: #e68900;
+}
+
+.guide-arrow {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 2px solid #4CAF50;
+    transform: rotate(45deg);
+    left: -11px;
+    top: 50%;
+    margin-top: -10px;
+}
+
+/* ハイライトオーバーレイ */
+.highlight-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.highlight-element {
+    position: relative;
+    z-index: 10001;
+    border-radius: 8px;
+    box-shadow: 0 0 0 4px #4CAF50, 0 0 0 8px rgba(76, 175, 80, 0.3);
+    pointer-events: auto;
+    /* ハイライト要素はクリック可能 */
+    /* background: white !important; を削除 - ボタンの元の色を保持 */
+}
+
+/* ボタン以外の要素（Blocklyワークスペースなど）用の白背景ハイライト */
+.highlight-element:not(button) {
+    background: white !important;
+}
+
+/* ボタン用のハイライト：元の色を保持しつつ明るくする */
+button.highlight-element {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    /* 明示的にクリック可能にする */
+    cursor: pointer;
+    /* カーソルをポインターに */
+}
+
+/* レスポンシブ対応（インタラクティブガイド） */
+@media (max-width: 768px) {
+    .interactive-guide {
+        position: fixed;
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        left: 20px;
+        width: auto;
+        transform: none;
+    }
+
+    .guide-arrow {
+        display: none;
+    }
+}
+
+/* === iPad 10.2 横向き専用レイアウト === */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    max-width: none;
+    zoom: 1;
+    /* スケーリング無効 */
+}
+
+.game-area {
+    flex: 1;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 10px;
+    gap: 10px;
+    background: white;
+}
+
+/* 左：Blocklyエディタ */
+.blockly-section {
+    flex: 0 0 45%;
+    height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+}
+
+#blocklyDiv {
+    flex: 1;
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+    margin: 0 !important;
+}
+
+/* 右：ゲームCanvas */
+.game-section {
+    flex: 0 0 55%;
+    height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#gameCanvas {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* 青ボタンをフリーモードの左隣に配置 */
+.audio-controls {
+    position: absolute !important;
+    top: 20px !important;
+    right: 200px !important;
+    /* ← フリーモードボタン分ずらす */
+    display: flex !important;
+    gap: 12px !important;
+    z-index: 100 !important;
+}
+
+/* 見た目そのまま */
+.audio-controls button {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    font-size: 18px !important;
+}
+
+/* === 左上の戻るボタン === */
+.back-button {
+    position: fixed;
+    /* 画面固定 */
+    top: 15px;
+    /* 上から15px */
+    left: 15px;
+    /* 左から15px */
+    background: #4CAF50;
+    /* 緑ボタン */
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 2000;
+    /* 他UIより上 */
+}
+
+.back-button:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+}

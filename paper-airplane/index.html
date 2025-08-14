@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紙飛行機ゲーム - Blockly</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+    <script src="https://unpkg.com/blockly/blocks.min.js"></script>
+    <script src="https://unpkg.com/blockly/javascript.min.js"></script>
+    <script src="https://unpkg.com/blockly/msg/ja.js"></script>
+</head>
+
+<body>
+    <!-- ゲーム選択画面へ戻るボタン -->
+    <a href="../index.html" class="back-button">← ゲーム選択へ戻る</a>
+
+    <div class="container">
+        <h1>紙飛行機ゲーム</h1>
+        <div class="audio-controls">
+            <button id="soundToggleButton" title="効果音のオン/オフ">🔊</button>
+            <button id="bgmToggleButton" title="BGMのオン/オフ">🎵</button>
+            <button id="volumeSettingsButton" title="音量設定">🎚️</button>
+        </div>
+        <div id="volumePanel" class="volume-panel" style="display: none;">
+            <div class="volume-control">
+                <label for="soundVolumeSlider">効果音: <span id="soundVolumeValue">50%</span></label>
+                <input type="range" id="soundVolumeSlider" min="0" max="100" value="50" step="5">
+            </div>
+            <div class="volume-control">
+                <label for="bgmVolumeSlider">BGM: <span id="bgmVolumeValue">30%</span></label>
+                <input type="range" id="bgmVolumeSlider" min="0" max="100" value="30" step="5">
+            </div>
+        </div>
+        <div class="game-area">
+            <!-- Blockly エディター -->
+            <div class="blockly-section">
+                <h2>プログラム作成</h2>
+                <div id="blocklyDiv" style="height: 400px; width: 100%;"></div>
+                <div class="controls">
+                    <button id="runButton">フライト</button>
+                    <button id="resetButton">リセット</button>
+                    <button id="stopLoopButton" style="display: none;">ループ停止</button>
+                    <button id="helpButton">ヘルプ</button>
+                    <button id="tutorialButton">チュートリアル</button>
+                    <button id="stageStartButton">ステージ開始</button>
+                    <button id="stageResetButton" style="display: none;">ステージリセット</button>
+                </div>
+            </div>
+
+            <!-- ゲーム画面 -->
+            <div class="game-section">
+                <div class="game-header">
+                    <h2>飛行シミュレーション</h2>
+                    <div id="stageInfoArea" class="stage-info-area" style="display: none;">
+                        <div class="stage-current">ステージ <span id="currentStageDisplay">1</span></div>
+                        <button id="stageSkipButton" class="stage-skip-btn" style="display: none;">スキップ</button>
+                    </div>
+                </div>
+                <canvas id="gameCanvas" width="600" height="400"></canvas>
+                <div class="game-info">
+                    <div class="parameter-display">
+                        <div>角度: <span id="angleDisplay">0</span>°</div>
+                        <div>強さ: <span id="powerDisplay">5</span></div>
+                        <div>重心: <span id="balanceDisplay">5</span>/10</div>
+                        <div>飛行距離: <span id="distanceDisplay">0</span></div>
+                        <div>最高高度: <span id="heightDisplay">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- インタラクティブガイド -->
+    <div id="interactiveGuide" class="interactive-guide" style="display: none;">
+        <div class="guide-content">
+            <div class="guide-header">
+                <div id="guideStep" class="guide-step"></div>
+                <button id="guideClose" class="guide-close-btn">×</button>
+            </div>
+            <div id="guideTitle" class="guide-title"></div>
+            <div id="guideContent" class="guide-text"></div>
+            <div class="guide-controls">
+                <button id="guidePrev" class="guide-btn guide-prev">前へ</button>
+                <button id="guideNext" class="guide-btn guide-next">次へ</button>
+                <button id="guideComplete" class="guide-btn guide-complete" style="display: none;">完了</button>
+            </div>
+        </div>
+        <div id="guideArrow" class="guide-arrow"></div>
+    </div>
+
+    <!-- ハイライトオーバーレイ -->
+    <div id="highlightOverlay" class="highlight-overlay" style="display: none;"></div>
+
+    <!-- Blockly ツールボックス -->
+    <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+        <category name="紙飛行機" colour="#5ba55b">
+            <block type="set_angle">
+                <value name="ANGLE">
+                    <shadow type="math_number">
+                        <field name="NUM">0</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="set_power">
+                <value name="POWER">
+                    <shadow type="math_number">
+                        <field name="NUM">5</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="set_balance">
+                <value name="BALANCE">
+                    <shadow type="math_number">
+                        <field name="NUM">5</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="throw_airplane"></block>
+        </category>
+        <category name="ループ" colour="#e67e22">
+            <block type="loop_count">
+                <value name="COUNT">
+                    <shadow type="math_number">
+                        <field name="NUM">3</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="loop_until_distance">
+                <value name="DISTANCE">
+                    <shadow type="math_number">
+                        <field name="NUM">100</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="loop_until_true">
+                <value name="CONDITION">
+                    <block type="bird_event_occurred"></block>
+                </value>
+            </block>
+        </category>
+        <category name="条件" colour="#8e44ad">
+            <block type="bird_event_occurred"></block>
+            <block type="distance_greater_than">
+                <value name="DISTANCE">
+                    <shadow type="math_number">
+                        <field name="NUM">100</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+        <category name="数学" colour="#5b80a5">
+            <block type="math_number">
+                <field name="NUM">0</field>
+            </block>
+            <block type="math_arithmetic">
+                <value name="A">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+                <value name="B">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+        <category name="変数" colour="#a55b80" custom="VARIABLE"></category>
+    </xml>
+
+    <!-- ヘルプモーダル -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🛩️ 紙飛行機ゲーム ヘルプ</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h3>🎯 ゲームの目的</h3>
+                    <p>Blocklyブロックを使って紙飛行機のパラメータを設定し、より遠くまで飛ばすことを目指しましょう！</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>🧩 使用できるブロック</h3>
+
+                    <div class="block-category">
+                        <h4>📐 紙飛行機ブロック</h4>
+                        <ul>
+                            <li><strong>投げる角度を設定</strong>: 0-90度で飛行角度を設定</li>
+                            <li><strong>投げる強さを設定</strong>: 1-10で投げる力を設定<br>
+                                <small>⚠️ 強さが大きいほど角度にブレが発生！（強さ10で最大±25度）</small>
+                            </li>
+                            <li><strong>重心を設定</strong>: 1-10で紙飛行機の重心位置を設定（5が中央）<br>
+                                <small>💡 前重心はブレが上向き、後重心はブレが下向きになりやすい</small>
+                            </li>
+                            <li><strong>紙飛行機を飛ばす</strong>: 設定したパラメータで飛行開始</li>
+                        </ul>
+                    </div>
+
+                    <div class="block-category">
+                        <h4>🔄 ループブロック</h4>
+                        <ul>
+                            <li><strong>繰り返し回数</strong>: 指定した回数だけ処理を繰り返し（最大16回）</li>
+                            <li><strong>飛距離条件ループ</strong>: 目標飛距離以上になるまで繰り返し（最大16回）</li>
+                            <li><strong>条件が真になるまで繰り返し</strong>: 指定した条件が満たされるまで繰り返し（最大50回）</li>
+                        </ul>
+                    </div>
+
+                    <div class="block-category">
+                        <h4>❓ 条件ブロック</h4>
+                        <ul>
+                            <li><strong>鳥イベントが発生した</strong>: 鳥の持ち去りイベントが発生したかチェック</li>
+                            <li><strong>飛距離が []m以上</strong>: 最後の飛行距離が指定した値以上かチェック</li>
+                        </ul>
+                        <p><small>※ 条件ブロックは「条件が真になるまで繰り返し」ブロックと組み合わせて使用します</small></p>
+                    </div>
+
+                    <div class="block-category">
+                        <h4>🔢 数学ブロック</h4>
+                        <ul>
+                            <li><strong>数値</strong>: 具体的な数値を入力</li>
+                            <li><strong>四則演算</strong>: 足し算、引き算、掛け算、割り算</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>🎮 操作方法</h3>
+                    <ol>
+                        <li>左側のツールボックスからブロックをドラッグ＆ドロップ</li>
+                        <li>ブロックを組み合わせてプログラムを作成</li>
+                        <li>「飛行機を飛ばす」ボタンでプログラム実行</li>
+                        <li>右側のシミュレーション画面で結果を確認</li>
+                        <li>「リセット」ボタンで初期状態に戻す</li>
+                    </ol>
+                </div>
+
+                <div class="help-section">
+                    <h3>🏆 ステージチャレンジ</h3>
+                    <p><strong>ステージ1</strong>: ゲームに慣れよう - 基本操作を覚えて紙飛行機を飛ばす</p>
+                    <p><strong>ステージ2</strong>: 距離の挑戦 - 90m以上飛ばしてみよう</p>
+                    <p><strong>ステージ3</strong>: 安定性の証明 - ループで10回飛ばし、平均80m以上を達成</p>
+                    <p><strong>ステージ4</strong>: 幸運を掴もう - ループで鳥イベントを発生させよう</p>
+                    <p><strong>ステージ5</strong>: プログラマーへの道 - 変数とループで16回のバリエーション飛行</p>
+                    <p>右上にステージ進捗が表示されます。「ステージリセット」ボタンで最初からやり直せます。</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>🚀 特殊イベント</h3>
+                    <p><strong>月着陸イベント</strong>: 特定のパラメータの組み合わせで、特別なアニメーションが発生します！いろいろな値を試してみて、隠されたイベントを見つけてみましょう。
+                        <button id="moonHintButton" class="hint-button" title="月着陸のヒント">💡</button>
+                    </p>
+                    <div id="moonHintContent" class="hint-content" style="display: none;">
+                        <p><strong>🌙 月着陸のヒント:</strong></p>
+                        <ul>
+                            <li>角度: 77度に設定</li>
+                            <li>強さ: 7に設定</li>
+                            <li>重心: 7に設定</li>
+                            <li>この組み合わせで宇宙まで飛んでいきます！</li>
+                        </ul>
+                    </div>
+                    <p><strong>🐦 鳥の持ち去りイベント</strong>: 空高く飛んでいると、鳥に持ち去られることがあります。まれに発生する珍しい現象です。</p>
+                    <p><strong>💩 うんぴーイベント</strong>: 低空飛行中に思わぬ障害物に遭遇することがあります。運が悪いと発生する汚い出来事です。</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>💡 飛行のコツ</h3>
+                    <ul>
+                        <li><strong>角度</strong>: 45度前後が一般的に飛距離を稼げます</li>
+                        <li><strong>強さ</strong>:
+                            <ul>
+                                <li>弱い力（1-5）: ブレが少なく安定、飛距離は短め</li>
+                                <li>強い力（6-10）: 飛距離は伸びるが角度ブレで予測困難</li>
+                                <li>最強力（10）: 最大±25度のブレ！ギャンブル要素大</li>
+                            </ul>
+                        </li>
+                        <li><strong>重心</strong>:
+                            <ul>
+                                <li>前重心（1-3）: 速度重視、安定性低、<strong>ブレが上方向寄り</strong></li>
+                                <li>中央（4-6）: バランス型、ブレ方向は均等</li>
+                                <li>後重心（7-10）: 安定性重視、速度低、<strong>ブレが下方向寄り</strong><br>
+                                    <small>🪂 45度未満の角度では頂点後に滑空効果発動！</small>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><strong>ループ機能</strong>: 自動で最適なパラメータを探索できます</li>
+                        <li><strong>条件ループ</strong>: 「条件が真になるまで繰り返し」で目標達成まで自動実行</li>
+                        <li><strong>戦略</strong>: 安定を取るか、ギャンブルで大記録を狙うか？</li>
+                    </ul>
+
+                    <div class="help-subsection">
+                        <h4>🧠 条件ブロックの活用例</h4>
+                        <ul>
+                            <li><strong>鳥イベント狙い</strong>: 「鳥イベントが発生した」で自動的に鳥を待つ</li>
+                            <li><strong>目標距離達成</strong>: 「飛距離が100m以上」で目標距離まで自動飛行</li>
+                            <li><strong>変数との組み合わせ</strong>: 変数で目標値を設定し、条件で判定</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>🪂 滑空効果</h3>
+                    <p><strong>条件</strong>: 重心7-10 + 角度45度未満 + 頂点通過後</p>
+                    <ul>
+                        <li>下降速度を緩和して長時間滞空</li>
+                        <li>前進速度を維持して飛距離を延長</li>
+                        <li>重心が後ろほど、角度が小さいほど効果大（最大15%）</li>
+                        <li><strong>強力滑空</strong>（13%以上）は8%の確率でのみ発生</li>
+                        <li>低角度＋後重心で記録的な飛距離を狙える！</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🏆 記録について</h3>
+                    <p>飛行距離と最高高度が記録されます。1000m以上の場合は自動的にkmで表示されます。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BGM初期化モーダル -->
+    <div id="bgmInitModal" class="modal" style="display: block;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎵 音声の設定</h2>
+            </div>
+            <div class="modal-body">
+                <p>このゲームでは効果音とBGMが再生されます。</p>
+                <p>音声を有効にしてゲームをお楽しみください！</p>
+                <div style="margin: 20px 0;">
+                    <label>
+                        <input type="checkbox" id="enableSound" checked> 効果音を有効にする
+                    </label>
+                </div>
+                <div style="margin: 20px 0;">
+                    <label>
+                        <input type="checkbox" id="enableBGM" checked> BGMを有効にする
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="startGameWithAudio" class="modal-button primary">ゲーム開始</button>
+                <button id="startGameWithoutAudio" class="modal-button secondary">音声なしで開始</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- チュートリアルモーダル -->
+    <div id="tutorialModal" class="modal">
+        <div class="modal-content tutorial-modal">
+            <div class="modal-header">
+                <h2>🎓 チュートリアル</h2>
+                <div class="tutorial-nav">
+                    <span id="tutorialStep">ステップ 1 / 5</span>
+                    <span class="close tutorial-close">&times;</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="tutorialContent">
+                    <!-- チュートリアルの内容がここに動的に表示されます -->
+                </div>
+                <div class="tutorial-controls">
+                    <button id="tutorialPrev" class="tutorial-btn">← 前へ</button>
+                    <button id="tutorialNext" class="tutorial-btn">次へ →</button>
+                    <button id="tutorialComplete" class="tutorial-btn tutorial-complete"
+                        style="display: none;">完了！</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+    <script src="custom-blocks.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>
