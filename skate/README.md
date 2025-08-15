@@ -1,15 +1,10 @@
-# Blockly サンプルアプリ
+## 起動方法
 
-Blockly を使用した迷路ゲームのサンプルアプリです。
+```bash
+cd blockly-game
 
-## 動作方法
+docker compose up -d
+```
 
-1. ターミナルで以下のコマンドを実行する。
-
-   ```bash
-   http-server -p 8600
-   ```
-
-2. ブラウザで `http://localhost:8600` にアクセスする。1.のコマンド実行後に vscode であれば、ポップアップが表示される。
-
-3. myblockly のディレクトリを選択する。
+http://localhost:8082
+にアクセス

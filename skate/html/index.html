@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ステージ選択</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        html,
+        body.home {
+            overflow: hidden
+        }
+
+        #stageGrid {
+            transform-origin: top center;
+            will-change: transform
+        }
+
+        /* --- ロック表示 --- */
+        .stage-card.locked {
+            pointer-events: none;
+            filter: grayscale(.85) brightness(.7);
+            opacity: .55
+        }
+
+
+        /* --- モーダル --- */
+        .backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1500
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.8rem;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+            text-align: center
+        }
+
+        .modal h2 {
+            margin-top: 0;
+            font-size: 1.3rem
+        }
+
+        .modal .act-btn {
+            width: 100%;
+            padding: .6rem;
+            margin: .4rem 0;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        .reset-btn {
+            background: #ff6f6f;
+            color: #fff
+        }
+
+        .unlock-btn {
+            background: #4caf50;
+            color: #fff
+        }
+
+        .modal input {
+            width: 100%;
+            padding: .6rem;
+            font-size: 1rem;
+            margin: 1rem 0;
+            border: 1px solid #ccc;
+            border-radius: 6px
+        }
+
+        .pwd-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center
+        }
+
+        .pwd-actions button {
+            padding: .45rem 1.2rem;
+            font-size: .95rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer
+        }
+
+        .close {
+            background: #9e9e9e;
+            color: #fff
+        }
+
+        .confirm {
+            background: #2196f3;
+            color: #fff
+        }
+
+        /* ヘッダー全体 */
+        header.header-bar {
+            display: flex;
+            align-items: center;
+            /* 高さ揃え */
+            justify-content: space-between;
+            background: #4fc3f7;
+            padding: 0.5rem 1rem;
+            height: 70px;
+            /* タイトルに合った高さ */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* タイトル（大きく維持） */
+        header .header-title {
+            font-size: 1.5rem;
+            color: #fff;
+            margin: 0 auto;
+            /* 中央寄せ */
+            text-align: center;
+            flex: 1;
+        }
+
+        /* 戻るボタン */
+        header .back-btn {
+            background: #607d8b;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        header .back-btn:hover {
+            background: #455a64;
+        }
+
+        /* 進行管理ボタンをタイトルと完全水平に */
+        #manageBtn {
+            align-self: center;
+            /* 垂直中央揃えを強制 */
+            margin-right: 0.5rem;
+            /* 右端から少し余裕 */
+            background: #607d8b;
+            color: #fff;
+            padding: 0.5rem 1.1rem;
+            /* タイトル高さに近い */
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #manageBtn:hover {
+            background: #455a64;
+        }
+    </style>
+</head>
+
+<body class="home">
+    <header class="header-bar">
+        <a href="../" class="back-btn">← ゲーム選択へ</a>
+        <h1 class="header-title">エネコム プログラミング体験 2025</h1>
+        <button id="manageBtn">進行管理</button>
+    </header>
+
+
+    <main class="stage-grid" id="stageGrid">
+        <a href="stage1.html" class="stage-card" data-stage="1"><img src="assets/stage1.png" alt="Stage 1" /><span
+                class="label">1</span></a>
+        <a href="stage2.html" class="stage-card" data-stage="2"><img src="assets/stage2.png" alt="Stage 2" /><span
+                class="label">2</span></a>
+        <a href="stage3.html" class="stage-card" data-stage="3"><img src="assets/stage3.png" alt="Stage 3" /><span
+                class="label">3</span></a>
+        <a href="stage4.html" class="stage-card" data-stage="4"><img src="assets/stage4.png" alt="Stage 4" /><span
+                class="label">4</span></a>
+        <a href="stage5.html" class="stage-card" data-stage="5"><img src="assets/stage5.png" alt="Stage 5" /><span
+                class="label">5</span></a>
+        <a href="stage6.html" class="stage-card" data-stage="6"><img src="assets/stage6.png" alt="Stage 6" /><span
+                class="label">6</span></a>
+        <a href="stage7.html" class="stage-card" data-stage="7"><img src="assets/stage7.png" alt="Stage 7" /><span
+                class="label">7</span></a>
+        <a href="stage8.html" class="stage-card" data-stage="8"><img src="assets/stage8.png" alt="Stage 8" /><span
+                class="label">8</span></a>
+        <a href="stage9.html" class="stage-card" data-stage="9"><img src="assets/stage9.png" alt="Stage 9" /><span
+                class="label">9</span></a>
+        <a href="stage10.html" class="stage-card" data-stage="10"><img src="assets/stage10.png" alt="Stage 10" /><span
+                class="label">10</span></a>
+        <a href="stage11.html" class="stage-card" data-stage="11"><img src="assets/stage11.png" alt="Stage 11" /><span
+                class="label">11</span></a>
+        <a href="stage12.html" class="stage-card" data-stage="12"><img src="assets/stage12.png" alt="Stage 12" /><span
+                class="label">12</span></a>
+    </main>
+
+    <noscript>
+        <p style="text-align:center;color:#f00;margin:1rem 0;">※JavaScriptを有効にしてください。</p>
+    </noscript>
+
+    <!-- モーダル -->
+    <div id="modalBackdrop" class="backdrop">
+        <div class="modal" id="ctrlModal">
+            <button id="closeX"
+                style="position:absolute;top:8px;right:10px;border:none;background:transparent;font-size:1.4rem;line-height:1;cursor:pointer">×</button>
+            <!-- STEP 0: アクション選択 -->
+            <div id="chooseArea">
+                <h2>進行管理</h2>
+                <button class="act-btn reset-btn" id="chooseReset">進行状況リセット</button>
+                <button class="act-btn unlock-btn" id="chooseUnlock">全ステージ開放</button>
+            </div>
+            <!-- STEP 1: パスワード入力 -->
+            <div id="pwdArea" style="display:none;">
+                <h2 id="pwdTitle">確認</h2>
+                <p>パスワードを入力してください</p>
+                <input type="password" id="modalPwd" placeholder="パスワード" />
+                <div class="pwd-actions">
+                    <button class="close" id="cancelPwd">キャンセル</button>
+                    <button class="confirm" id="okPwd">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /***** 設定 *****/
+        const TOTAL_STAGE = 12;
+        const PWD_RESET = 'password';
+        const PWD_UNLOCK = 'password';
+
+        /***** 進行状況 *****/
+        function getProgress() {
+            const v = parseInt(localStorage.getItem('stageProgress') || '0', 10);
+            return isNaN(v) || v < 1 ? 1 : v;
+        }
+        function setProgress(n) { localStorage.setItem('stageProgress', n) }
+        if (!localStorage.getItem('stageProgress')) setProgress(1);
+
+        /***** ステージカード制御 *****/
+        const cards = [...document.querySelectorAll('.stage-card')];
+        function refreshCards() {
+            const prog = getProgress();
+            cards.forEach(card => {
+                const num = parseInt(card.dataset.stage, 10);
+                card.classList.toggle('locked', num > prog);
+            });
+        }
+        cards.forEach(card => card.addEventListener('click', e => {
+            if (card.classList.contains('locked')) e.preventDefault();
+        }));
+
+        /***** ゲーム側連携 *****/
+        window.advanceProgress = function (next) {
+            if (next > getProgress() && next <= TOTAL_STAGE) setProgress(next);
+            refreshCards();
+        };
+
+        /***** モーダル制御 *****/
+        const backdrop = document.getElementById('modalBackdrop');
+        const chooseArea = document.getElementById('chooseArea');
+        const pwdArea = document.getElementById('pwdArea');
+        const pwdInput = document.getElementById('modalPwd');
+        let pendingAction = null; // 'reset' | 'unlock'
+
+        function openChooseModal() {
+            pendingAction = null;
+            chooseArea.style.display = 'block';
+            pwdArea.style.display = 'none';
+            backdrop.style.display = 'flex';
+        }
+        function openPwdModal(action) {
+            pendingAction = action;
+            chooseArea.style.display = 'none';
+            pwdArea.style.display = 'block';
+            document.getElementById('pwdTitle').textContent = action === 'reset' ? '進行状況をリセット' : '全ステージを開放';
+            pwdInput.value = '';
+            pwdInput.focus();
+        }
+        function closeModal() { backdrop.style.display = 'none'; }
+        function handlePwdConfirm() {
+            const pwd = pwdInput.value.trim();
+            if (pendingAction === 'reset' && pwd === PWD_RESET) {
+                setProgress(1); refreshCards(); closeModal();
+            } else if (pendingAction === 'unlock' && pwd === PWD_UNLOCK) {
+                setProgress(TOTAL_STAGE); refreshCards(); closeModal();
+            } else {
+                alert('パスワードが違います');
+            }
+        }
+
+        document.getElementById('manageBtn').addEventListener('click', openChooseModal);
+        document.getElementById('chooseReset').addEventListener('click', () => openPwdModal('reset'));
+        document.getElementById('chooseUnlock').addEventListener('click', () => openPwdModal('unlock'));
+        document.getElementById('cancelPwd').addEventListener('click', closeModal);
+        document.getElementById('okPwd').addEventListener('click', handlePwdConfirm);
+        pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') handlePwdConfirm() });
+        // × ボタンでも閉じる
+        document.getElementById('closeX').addEventListener('click', e => { e.stopPropagation(); closeModal(); });
+
+        /***** グリッド自動フィット（既存） *****/
+        (() => {
+            const grid = document.getElementById('stageGrid');
+            const header = document.querySelector('header');
+            if (!grid) return;
+            function fitGrid() {
+                grid.style.transform = 'none';
+                grid.style.marginTop = '0px';
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+                const headerH = header ? header.offsetHeight : 0;
+                const availW = vw;
+                const availH = vh - headerH;
+                const rect = grid.getBoundingClientRect();
+                const scale = Math.min(availW / rect.width, availH / rect.height, 1);
+                grid.style.transform = `scale(${scale})`;
+                const usedH = rect.height * scale;
+                const topMargin = Math.max((availH - usedH) / 2, 0);
+                grid.style.marginTop = `${topMargin}px`;
+            }
+            window.addEventListener('load', fitGrid);
+            window.addEventListener('resize', fitGrid);
+            window.addEventListener('orientationchange', fitGrid);
+        })();
+
+        /***** 初期化 *****/
+        refreshCards();
+    </script>
+    <script src="js/no-ui-bgm.js"></script>
+    <script>
+        setupNoUiBGM('assets/bgm/game.mp3', { startMuted: true });
+    </script>
+
+
+</body>
+
+</html>

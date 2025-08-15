@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ステージ 8</title>
+
+  <!-- 共通スタイル -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <!-- ===== Tutorial Modal ===== -->
+  <div id="tutorialBackdrop" class="modal-backdrop hidden"></div>
+  <div id="tutorialModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeTutorialModal()">×</button>
+      <h2 class="tut-title">ステージ説明</h2>
+      <div class="tut-body"></div>
+      <div class="modal-footer">
+        <button class="modal-ok" onclick="closeTutorialModal()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Clear Modal ===== -->
+  <div id="clearBackdrop" class="modal-backdrop hidden"></div>
+  <div id="clearModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeClearModal()">×</button>
+      <h2 class="clear-title">コースクリア！🎉</h2>
+      <div class="clear-body">
+        おめでとう！<br>
+        ブロック数 <span id="clearSteps"></span> 手でゴールできたよ！
+      </div>
+      <div class="modal-footer">
+        <button class="modal-replay" onclick="replayStage()">もう一回プレイ</button>
+        <a id="nextStageBtn" class="modal-next" href="#">次のステージへ</a>
+        <button class="modal-ok" onclick="closeClearModal()">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- HEADER ---------- -->
+  <header>
+    <button class="back-btn" onclick="location.href='index.html'">← ホームへ戻る</button>
+    <div>ステージ 8</div>
+    <div class="header-right">
+      <a id="headerNextBtn" class="pane-toggle hidden" href="#">▶ 次のステージへ</a>
+      <button id="toggleGameBtn" class="pane-toggle" aria-pressed="false">⏹ ゲーム非表示</button>
+    </div>
+  </header>
+
+
+  <!-- ---------- MAIN ---------- -->
+  <div class="container">
+    <!-- Blockly -->
+    <div class="left-panel" id="blocklyDiv"></div>
+
+    <!-- Game -->
+    <div class="right-panel">
+      <canvas id="gameCanvas" width="600" height="600"></canvas>
+
+      <div class="btn-box">
+        <button class="game-btn" id="runBtn">実行</button>
+        <button class="game-btn" id="resetBtn">リセット</button>
+      </div>
+
+      <div id="statusBar"></div>
+    </div>
+  </div>
+
+  <!-- ---------- SCRIPT LOAD ---------- -->
+  <!-- (1) このステージのマップ -->
+  <script src="stages/stage8-map.js"></script>
+
+  <script>
+    window.onload = function () {
+      showTutorialModal();
+    };
+  </script>
+
+  <!-- (2) Blockly CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/blockly_compressed.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/blocks_compressed.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/javascript_compressed.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/msg/ja.js"></script>
+
+  <!-- (3) ブロック定義＋ワークスペース初期化 -->
+  <script src="js/blockly-setup.js"></script>
+
+  <!-- (4) 共通ユーティリティ（fail/successなど） -->
+  <script src="js/util.js"></script>
+
+  <!-- (5) メインロジック（描画・移動） -->
+  <script src="js/logic.js"></script>
+
+  <script>
+    (function () {
+      const btn = document.getElementById('toggleGameBtn');
+
+      // 前回状態を復元
+      const hidden = localStorage.getItem('hideGame') === '1';
+      if (hidden) applyHiddenState(true);
+
+      btn.addEventListener('click', () => {
+        const nowHidden = document.body.classList.toggle('hide-game');
+        applyHiddenState(nowHidden);
+        localStorage.setItem('hideGame', nowHidden ? '1' : '0');
+
+        if (window.Blockly && window.workspace) {
+          Blockly.svgResize(window.workspace);
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        if (window.Blockly && window.workspace) {
+          Blockly.svgResize(window.workspace);
+        }
+      });
+
+      function applyHiddenState(isHidden) {
+        btn.textContent = isHidden ? '▶︎ ゲーム表示' : '⏹ ゲーム非表示';
+        btn.setAttribute('aria-pressed', isHidden.toString());
+      }
+    })();
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const nextBtn = document.getElementById('headerNextBtn');
+      if (nextBtn) {
+        nextBtn.classList.remove('show-next');
+        nextBtn.classList.add('hidden');
+        nextBtn.style.display = ''; // 念のためリセット
+      }
+    });
+
+
+  </script>
+  <script src="js/no-ui-bgm.js"></script>
+  <script>
+    setupNoUiBGM('assets/bgm/game.mp3', { startMuted: true });
+  </script>
+
+</body>
+
+</html>
