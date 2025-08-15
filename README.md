@@ -9,10 +9,13 @@ Blockly (https://developers.google.com/blockly) を利用し作成していま�
 ## ディレクトリ構成
 ```
 /
+---doc/ : 利用マニュアルなどのパワーポイント
 ---maze/ : 迷路ゲーム
 ---skate/ : スケートゲーム
 ---paper-airplane/ : 紙飛行機シミュレーション
 ---robot-controller/ : ロボット制御プログラミング
+---image.png : 背景画像
+---index.html : トップページ
 ---LISENSE : ライセンス
 ---README.md : このファイル
 ```
