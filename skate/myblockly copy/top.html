@@ -1,0 +1,175 @@
+<script>
+  // practice10.htmlから遷移した場合のみステージ選択ボタンを表示
+  window.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    // practice10.htmlから遷移してきた場合はスタートボタンを非表示＆descテキスト変更
+    if (params.get("from") === "practice10") {
+      const startBtn = document.querySelector(
+        '.stage-link[onclick*="practice1.html"]'
+      );
+      const desc = document.querySelector(".desc");
+      if (desc) {
+        desc.innerHTML = "好きなステージの迷路をプレイしてみよう！";
+      }
+      if (startBtn) {
+        startBtn.style.display = "none";
+        // ステージ1〜10ボタンを表示
+        const stageDiv = document.createElement("div");
+        stageDiv.id = "stageButtons";
+        stageDiv.style.display = "grid";
+        stageDiv.style.gridTemplateColumns = "repeat(5, 1fr)";
+        stageDiv.style.gap = "6px";
+        stageDiv.style.justifyItems = "center";
+        stageDiv.style.margin = "24px 0 0 0";
+        for (let i = 1; i <= 10; i++) {
+          const btn = document.createElement("button");
+          btn.textContent = `ステージ${i}`;
+          btn.style =
+            "width:110px;padding:14px 0;font-size:20px;background-color:#888;color:white;border:none;border-radius:6px;cursor:pointer;";
+          btn.onclick = () => {
+            window.location.href = `practice${i}.html`;
+          };
+          stageDiv.appendChild(btn);
+        }
+        // .container内のスタートボタンの直後に挿入
+        const container = document.querySelector(".container");
+        if (container && startBtn.nextSibling) {
+          container.insertBefore(stageDiv, startBtn.nextSibling);
+        } else if (container) {
+          container.appendChild(stageDiv);
+        }
+      }
+    }
+  });
+</script>
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>迷路ゲーム トップページ</title>
+    <style>
+      #stageButtons {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        justify-items: center;
+        margin: 24px 0 0 0;
+      }
+      /* ステージボタン中央寄せ用ラッパー */
+      body > .stage-center-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 220px;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 60px auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+        padding: 40px 30px 30px 30px;
+        text-align: center;
+      }
+      h1 {
+        color: #4caf50;
+        margin-bottom: 16px;
+        font-size: 2.2rem;
+      }
+      .desc {
+        color: #555;
+        margin-bottom: 32px;
+        font-size: 1.1rem;
+      }
+      .stage-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 24px 0;
+      }
+      .stage-list li {
+        margin: 12px 0;
+      }
+      .stage-link {
+        display: inline-block;
+        background: #4caf50;
+        color: #fff;
+        text-decoration: none;
+        padding: 12px 32px;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        transition: background 0.2s;
+      }
+      .stage-link:hover {
+        background: #388e3c;
+      }
+      .credit {
+        margin-top: 32px;
+        color: #aaa;
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      id="gameSelectBtn"
+      style="
+        position: fixed;
+        top: 18px;
+        left: 18px;
+        z-index: 2001;
+        background: #888;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 18px;
+        font-size: 1.05rem;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(136, 136, 136, 0.12);
+      "
+    >
+      ←ゲーム選択へ
+    </button>
+    <audio id="bgmAudio" src="BGM.mp3" loop></audio>
+    <div class="container">
+      <h1>迷路ゲーム</h1>
+      <div class="desc">
+        ブロックを組み立てて迷路をクリアしよう！<br />
+        スタートボタンでゲームを始めよう。
+      </div>
+      <button
+        class="stage-link"
+        style="font-size: 1.3rem; padding: 18px 48px; margin: 32px 0 24px 0"
+        onclick="location.href='practice1.html'"
+      >
+        スタート
+      </button>
+    </div>
+  </body>
+</html>
+<script>
+  document.getElementById("gameSelectBtn").onclick = function () {
+    window.location.href = "../";
+  };
+  // BGMをJavaScriptで制御
+  window.addEventListener("DOMContentLoaded", function () {
+    const audio = document.getElementById("bgmAudio");
+    if (audio) {
+      audio.volume = 0.5;
+      audio.play().catch(() => {
+        // ユーザー操作が必要な場合は、最初のクリックで再生
+        const playBGM = () => {
+          audio.play().catch(() => {});
+          document.removeEventListener("click", playBGM);
+        };
+        document.addEventListener("click", playBGM);
+      });
+    }
+  });
+</script>
