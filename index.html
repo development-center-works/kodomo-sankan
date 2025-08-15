@@ -31,13 +31,14 @@
     }
 
     /* マニュアルボタンのスタイル */
-	.manual-button {
-	  position: fixed;
-	  top: 20px;
-	  right: 20px; /* 右寄せにする */
-	  z-index: 1000;
-	  transition: all 0.3s ease;
-	}
+    .manual-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      /* 右寄せにする */
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
 
     .manual-button:hover {
       transform: scale(1.05);
@@ -57,6 +58,13 @@
       <span class="text-lg">🙋</span>
       <span class="hidden sm:inline">解答例</span>
     </button>
+  </div>
+  <div class="fixed bottom-5 right-5 z-50">
+    <a href="https://github.com/development-center-works/kodomo-sankan" target="_blank"
+      class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-300 transform hover:scale-105">
+      <span class="text-lg">💻</span>
+      <span class="hidden sm:inline">ソースリンク</span>
+    </a>
   </div>
   <div class="bg-white p-8 rounded-xl shadow-2xl max-w-4xl w-full text-center">
     <h1 class="text-4xl font-extrabold text-gray-900 mb-8">ゲームを選択</h1>
