@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ロボット制御プログラミング - Blockly学習</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Blockly CDN - 安定したバージョンを指定 -->
+    <script src="https://unpkg.com/blockly@9.3.3/blockly.min.js"></script>
+    <script src="https://unpkg.com/blockly@9.3.3/blocks.min.js"></script>
+    <script src="https://unpkg.com/blockly@9.3.3/javascript.min.js"></script>
+    <script src="https://unpkg.com/blockly@9.3.3/msg/ja.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="../index.html" class="back-btn">← ホームに戻る</a>
+            <h1>🤖 ロボット制御プログラミング</h1>
+            <div class="stage-selector-container">
+                <button id="stageSelectToggle" class="stage-select-toggle">
+                    <span class="toggle-icon">⚙️</span>
+                    <span class="toggle-text">ステージ選択</span>
+                </button>
+
+                <div id="stageSelectorPanel" class="stage-selector-panel">
+                    <div class="panel-header">
+                        <h4>ステージ選択</h4>
+                        <button id="closeStagePanelBtn" class="close-panel-btn">&times;</button>
+                    </div>
+
+                    <div class="stage-selector">
+                        <label for="stageSelect">学習コース:</label>
+                        <select id="stageSelect">
+                            <option value="basic-movement">基本移動</option>
+                            <option value="loops">ループ処理</option>
+                            <option value="conditions">条件分岐</option>
+                            <option value="variables">変数の使用</option>
+                            <option value="functions">関数の定義</option>
+                            <option value="challenge">総合チャレンジ</option>
+                        </select>
+
+                        <label for="levelSelect">ステージ:</label>
+                        <select id="levelSelect">
+                            <option value="0">レベル 1</option>
+                        </select>
+
+                        <button id="goToStage" class="btn btn-info">このステージへ</button>
+
+                        <div class="stage-description">
+                            <small id="stageDescription">ステージを選択すると詳細が表示されます</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="game-area">
+            <!-- Blocklyプログラミングエリア -->
+            <div class="programming-section">
+                <div class="section-header">
+                    <h2>📝 プログラム作成</h2>
+                    <div class="learning-info">
+                        <span id="currentConcept">基本移動</span>
+                    </div>
+                </div>
+
+                <div id="blocklyDiv" class="blockly-workspace"></div>
+
+                <div class="controls">
+                    <button id="runProgram" class="btn btn-primary">🚀 実行</button>
+                    <button id="stopProgram" class="btn btn-danger">⏹️ 停止</button>
+                    <button id="resetProgram" class="btn btn-warning">🔄 リセット</button>
+                    <button id="showHint" class="btn btn-info">💡 ヒント</button>
+                    <button id="nextStage" class="btn btn-success" style="display: none;">次のステージ ➡️</button>
+                </div>
+            </div>
+
+            <!-- ゲーム画面エリア -->
+            <div class="game-section">
+                <div class="section-header">
+                    <h2>🎮 ロボット制御画面</h2>
+                    <div class="game-info">
+                        <span id="currentStageInfo">ステージ 1-1</span>
+                        <span id="scoreDisplay">スコア: 0</span>
+                    </div>
+                </div>
+
+                <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+                <div class="mission-info">
+                    <h3>🎯 ミッション</h3>
+                    <p id="missionDescription">ロボットを右に3マス移動させよう！</p>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 学習説明パネル -->
+        <div class="learning-panel">
+            <h3>📚 今回学ぶこと</h3>
+            <div id="learningContent">
+                <p><strong>基本移動:</strong> ロボットを上下左右に動かす基本的なコマンドを学びます。</p>
+                <ul>
+                    <li>「前に進む」ブロックでロボットを移動</li>
+                    <li>「右に回転」「左に回転」でロボットの向きを変更</li>
+                    <li>順次実行の概念を理解</li>
+                </ul>
+            </div>
+
+            <!-- 変数・関数表示パネル -->
+            <div class="variables-functions-panel">
+                <div class="panel-section">
+                    <h4>📊 作成した変数</h4>
+                    <div id="variablesList" class="items-list">
+                        <p class="empty-message">まだ変数が作成されていません</p>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h4>🛠️ 作成した関数</h4>
+                    <div id="functionsList" class="items-list">
+                        <p class="empty-message">まだ関数が作成されていません</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ヒントモーダル -->
+    <div id="hintModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💡 ヒント</h3>
+                <span class="close" id="closeHint">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="hintContent">
+                    <p>ここにヒントが表示されます。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功モーダル -->
+    <div id="successModal" class="modal">
+        <div class="modal-content success-modal">
+            <div class="modal-header">
+                <h3>🎉 ミッション成功！</h3>
+            </div>
+            <div class="modal-body">
+                <div id="successContent">
+                    <p>おめでとうございます！ミッションをクリアしました。</p>
+                    <div class="achievement">
+                        <span id="achievementText">基本移動をマスターしました！</span>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button id="continueButton" class="btn btn-primary">次に進む</button>
+                    <button id="retryButton" class="btn btn-secondary">もう一度</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ツールボックス定義 -->
+    <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+        <category name="🚀 移動" colour="#4CAF50">
+            <block type="move_forward"></block>
+            <block type="turn_right"></block>
+            <block type="turn_left"></block>
+            <block type="turn_around"></block>
+        </category>
+
+        <category name="🔄 ループ" colour="#FF9800">
+            <block type="controls_repeat_ext">
+                <value name="TIMES">
+                    <shadow type="math_number">
+                        <field name="NUM">3</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="controls_whileUntil"></block>
+            <block type="controls_for">
+                <value name="FROM">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+                <value name="TO">
+                    <shadow type="math_number">
+                        <field name="NUM">5</field>
+                    </shadow>
+                </value>
+                <value name="BY">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+
+        <category name="🤔 条件分岐" colour="#9C27B0">
+            <block type="controls_if"></block>
+            <block type="controls_ifelse"></block>
+            <block type="check_wall_ahead"></block>
+            <block type="check_goal_reached"></block>
+            <block type="check_item_here"></block>
+        </category>
+
+        <category name="📊 変数" colour="#795548" custom="VARIABLE">
+            <button text="変数を作る" callbackKey="CREATE_VARIABLE"></button>
+        </category>
+
+        <category name="🛠️ 関数" colour="#607D8B" custom="PROCEDURE">
+            <button text="関数を作る" callbackKey="CREATE_FUNCTION"></button>
+        </category>
+
+        <category name="🔢 数学" colour="#2196F3">
+            <block type="math_number">
+                <field name="NUM">1</field>
+            </block>
+            <block type="math_arithmetic">
+                <value name="A">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+                <value name="B">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="math_compare">
+                <value name="A">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+                <value name="B">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+
+        <category name="🎨 アクション" colour="#E91E63">
+            <block type="collect_item"></block>
+            <block type="place_item"></block>
+            <block type="wait_seconds">
+                <value name="SECONDS">
+                    <shadow type="math_number">
+                        <field name="NUM">1</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+    </xml>
+
+    <!-- JavaScriptファイルの読み込み -->
+    <script src="js/custom-blocks.js"></script>
+    <script src="js/game-engine.js"></script>
+    <script src="js/stage-manager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
