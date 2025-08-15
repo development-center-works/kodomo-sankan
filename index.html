@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ゲーム選択</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom font for better aesthetics */
+    body {
+      background-image: url('image.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      font-family: "Inter", sans-serif;
+      background-color: #f0f4f8;
+      /* Light background */
+    }
+
+    /* Custom styles for button hover effects */
+    .game-card-button {
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .game-card-button:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* マニュアルボタンのスタイル */
+	.manual-button {
+	  position: fixed;
+	  top: 20px;
+	  right: 20px; /* 右寄せにする */
+	  z-index: 1000;
+	  transition: all 0.3s ease;
+	}
+
+    .manual-button:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+
+<body class="flex items-center justify-center min-h-screen p-4">
+  <div class="fixed top-5 right-5 flex flex-col space-y-4 z-50">
+    <button onclick="openManual()"
+      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-300 transform hover:scale-105">
+      <span class="text-lg">📖</span>
+      <span class="hidden sm:inline">マニュアル</span>
+    </button>
+    <button onclick="openAnswer()"
+      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-300 transform hover:scale-105">
+      <span class="text-lg">🙋</span>
+      <span class="hidden sm:inline">解答例</span>
+    </button>
+  </div>
+  <div class="bg-white p-8 rounded-xl shadow-2xl max-w-4xl w-full text-center">
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-8">ゲームを選択</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- 迷路ゲームカード -->
+      <div
+        class="game-card-button bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center cursor-pointer"
+        onclick="selectGame('maze')">
+        <div class="text-6xl mb-4">🌀</div>
+        <!-- Maze icon -->
+        <h2 class="text-2xl font-bold mb-2">迷路ゲーム</h2>
+        <p class="text-blue-100 text-sm mb-4">
+          コマを動かしてゴールを目指すパズルゲームです。
+        </p>
+        <button
+          class="bg-white text-blue-700 font-semibold py-2 px-6 rounded-full hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75">
+          プレイする
+        </button>
+      </div>
+
+      <!-- スケートゲームカード -->
+      <div
+        class="game-card-button bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center cursor-pointer"
+        onclick="selectGame('skate')">
+        <div class="text-6xl mb-4">⛸️</div>
+        <!-- Skate icon -->
+        <h2 class="text-2xl font-bold mb-2">スケートゲーム</h2>
+        <p class="text-green-100 text-sm mb-4">
+          直線的に滑るコマを操作して、ゴールにたどり着きましょう。
+        </p>
+        <button
+          class="bg-white text-green-700 font-semibold py-2 px-6 rounded-full hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-opacity-75">
+          プレイする
+        </button>
+      </div>
+
+      <!-- 紙飛行機シミュレーションゲームカード -->
+      <div
+        class="game-card-button bg-gradient-to-br from-purple-500 to-purple-700 text-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center cursor-pointer"
+        onclick="selectGame('paper-plane')">
+        <div class="text-6xl mb-4">✈️</div>
+        <!-- Paper Plane icon -->
+        <h2 class="text-2xl font-bold mb-2">紙飛行機シミュレーション</h2>
+        <p class="text-purple-100 text-sm mb-4">
+          紙飛行機を飛ばして、飛行ルートや距離をシミュレーションします。
+        </p>
+        <button
+          class="bg-white text-purple-700 font-semibold py-2 px-6 rounded-full hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-75">
+          プレイする
+        </button>
+      </div>
+
+      <!-- ロボット制御プログラミングゲームカード -->
+      <div
+        class="game-card-button bg-gradient-to-br from-orange-500 to-red-600 text-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center cursor-pointer"
+        onclick="selectGame('robot-controller')">
+        <div class="text-6xl mb-4">🤖</div>
+        <!-- Robot icon -->
+        <h2 class="text-2xl font-bold mb-2">ロボット制御プログラミング</h2>
+        <p class="text-orange-100 text-sm mb-4">
+          Blocklyでロボットを制御して、for文やif文などを学ぼう！
+        </p>
+        <button
+          class="bg-white text-orange-700 font-semibold py-2 px-6 rounded-full hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-opacity-75">
+          プレイする
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectGame(gameId) {
+      // ここに各ゲームへの遷移ロジックを記述します。
+      // 例えば、window.location.href = `games/${gameId}.html`; のようにリダイレクトできます。
+      // 実際のゲームページへのリダイレクト例（コメントアウトしています）
+      if (gameId === "maze") {
+        window.location.href = "maze/top.html";
+      } else if (gameId === "skate") {
+        window.location.href = "skate/";
+      } else if (gameId === "paper-plane") {
+        window.location.href = "paper-airplane/";
+      } else if (gameId === "robot-controller") {
+        window.location.href = "robot-controller/";
+      }
+    }
+
+    function openManual() {
+      // マニュアルページまたはPDFを開く
+      window.open('manual.pdf', '_blank');
+      // または別のマニュアルページに遷移
+      // alert('マニュアル機能は準備中です。\n\n各ゲームの遊び方は、ゲーム内のヒント機能をご利用ください。');
+
+      // 実際のマニュアルページがある場合は以下のようにリンクできます
+      // window.open('manual/index.html', '_blank');
+    }
+    function openAnswer() {
+      // 解答例PDFを開く
+      window.open('sample_answers.pdf', '_blank');
+    }
+  </script>
+</body>
+
+</html>
