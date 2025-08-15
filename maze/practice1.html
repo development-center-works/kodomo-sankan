@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blockly 迷路ゲーム</title>
+    <link rel="icon" href="favicon.ico" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+        min-height: 100vh;
+        height: 100vh;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .container {
+        display: flex;
+        gap: 16px;
+        max-width: 100vw;
+        min-width: 320px;
+        margin: 0 auto;
+        box-sizing: border-box;
+        height: calc(100vh - 40px);
+        min-height: 600px;
+      }
+
+      .left-panel {
+        flex: 1;
+        min-width: 0;
+        background: white;
+        border-radius: 8px;
+        padding: 16px 18px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        height: 100%;
+        min-height: 600px;
+        overflow-y: auto;
+      }
+
+      .right-panel {
+        flex: 1;
+        min-width: 0;
+        background: white;
+        border-radius: 8px;
+        padding: 16px 18px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+        height: 100%;
+        min-height: 600px;
+        overflow-y: auto;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 22px;
+        margin-top: 12px;
+      }
+
+      h2 {
+        color: #555;
+        margin-bottom: 12px;
+        margin-top: 8px;
+      }
+
+      #blocklyDiv {
+        height: 68vh;
+        min-height: 480px;
+        max-height: 800px;
+        width: 100%;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .controls {
+        margin: 16px 0 8px 0;
+        text-align: center;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 0 10px;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+
+      .reset-button {
+        background-color: #f44336;
+      }
+
+      .reset-button:hover {
+        background-color: #da190b;
+      }
+
+      #gameCanvas {
+        border: 2px solid #333;
+        border-radius: 4px;
+        background-color: #fff;
+        width: 100%;
+        max-width: 600px;
+        height: 60vh;
+        min-height: 400px;
+        max-height: 700px;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .game-info {
+        margin-top: 16px;
+        padding: 12px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+      }
+
+      .status {
+        font-weight: bold;
+        margin: 10px 0;
+        white-space: nowrap;
+        font-size: clamp(0.8em, 2vw, 1.1em);
+      }
+      .game-info > div {
+        font-size: clamp(0.8em, 2vw, 1.05em);
+      }
+      @media (max-width: 900px) {
+        .container {
+          flex-direction: column;
+          gap: 0;
+          height: calc(100vh - 40px);
+        }
+        .left-panel,
+        .right-panel {
+          width: 100%;
+          min-width: 0;
+          margin-bottom: 12px;
+          height: 50%;
+          min-height: 300px;
+        }
+        #blocklyDiv,
+        #gameCanvas {
+          height: 40vh;
+          min-height: 300px;
+          max-height: 500px;
+        }
+      }
+      @media (max-width: 600px) {
+        #gameCanvas {
+          max-width: 220px;
+          height: 32vh;
+          min-height: 180px;
+          max-height: 320px;
+        }
+        #blocklyDiv {
+          height: 32vh;
+          min-height: 180px;
+          max-height: 320px;
+        }
+        .status {
+          font-size: 0.95em;
+        }
+        .game-info > div {
+          font-size: 0.95em;
+        }
+      }
+
+      .success {
+        color: #4caf50;
+      }
+
+      .error {
+        color: #f44336;
+      }
+
+      .info {
+        color: #2196f3;
+      }
+
+      .toggle-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background-color: #2196f3;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 16px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle-button:hover {
+        background-color: #1976d2;
+      }
+
+      .container.blocks-hidden .left-panel {
+        display: none;
+      }
+
+      .container.blocks-hidden .right-panel {
+        flex: 1;
+        max-width: 100%;
+      }
+
+      /* モーダルスタイル */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease-in-out;
+      }
+
+      .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 40px;
+        border-radius: 15px;
+        width: 80%;
+        max-width: 650px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease-in-out;
+      }
+
+      .modal-title {
+        font-size: 2.5rem;
+        color: #4caf50;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      .modal-message {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+
+      .modal-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+      }
+
+      .modal-button {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 25px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .modal-button-primary {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .modal-button-primary:hover {
+        background-color: #45a049;
+        transform: translateY(-2px);
+      }
+
+      .modal-button-secondary {
+        background-color: #f44336;
+        color: white;
+      }
+
+      .modal-button-secondary:hover {
+        background-color: #da190b;
+        transform: translateY(-2px);
+      }
+
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: #ffd700;
+        animation: confetti-fall 3s linear infinite;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-50px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes confetti-fall {
+        0% {
+          transform: translateY(-100vh) rotate(0deg);
+          opacity: 1;
+        }
+
+        100% {
+          transform: translateY(100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .container {
+          flex-direction: column;
+          gap: 0;
+        }
+        .left-panel,
+        .right-panel {
+          width: 100%;
+          min-width: 0;
+          margin-bottom: 12px;
+        }
+      }
+      @media (max-width: 600px) {
+        #gameCanvas {
+          max-width: 320px;
+        }
+        .status {
+          font-size: 0.95em;
+        }
+        .game-info > div {
+          font-size: 0.95em;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <audio id="bgmAudio" src="BGM.mp3" loop></audio>
+    <button
+      id="toggleBlocksButton"
+      class="toggle-button"
+      title="ブロックパネルを表示/非表示"
+    >
+      ❌
+    </button>
+    <button
+      id="homeButton"
+      class="toggle-button"
+      title="ホームに戻る"
+      style="left: 80px; background-color: #ff9800"
+    >
+      🏠
+    </button>
+    <div
+      style="
+        position: relative;
+        margin-bottom: 22px;
+        margin-top: 12px;
+        width: 100%;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+      "
+    >
+      <h1 style="margin: 0; flex-grow: 1; text-align: center">
+        🎮 Blockly 迷路ゲーム ステージ１
+      </h1>
+    </div>
+    <button
+      id="nextStageBtn"
+      style="
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 32px;
+        z-index: 2000;
+        width: 200px;
+        height: 48px;
+        padding: 0 24px;
+        background-color: #2196f3;
+        color: white;
+        vertical-align: middle;
+        font-size: 1.08em;
+        border-radius: 24px;
+        box-shadow: 0 2px 8px rgba(33, 150, 243, 0.12);
+        white-space: nowrap;
+      "
+      class="modal-button"
+    >
+      ⏭️ 次のステージへ
+    </button>
+    <div class="container">
+      <div class="left-panel">
+        <h2 id="blockCountTitle">
+          📦 コードブロック
+          <span
+            id="blockCountRemain"
+            style="
+              font: size 20px;
+              color: #f44336;
+              float: right;
+              text-align: right;
+            "
+          ></span>
+        </h2>
+        <div id="blocklyDiv"></div>
+        <div class="controls">
+          <button id="runButton">🚀 コードを実行</button>
+          <button id="resetButton" class="reset-button">🔄 リセット</button>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <h2>🎯 ゲーム画面</h2>
+        <canvas id="gameCanvas" width="500" height="500"></canvas>
+        <div class="game-info">
+          <div class="status" id="status">ゲームを開始してください</div>
+          <div>
+            目標 : 青い点（プレイヤー）を赤い点（ゴール）まで移動させよう！
+          </div>
+          <button
+            id="nextStageBtn"
+            style="
+              display: none;
+              margin-top: 16px;
+              background-color: #2196f3;
+              color: white;
+            "
+            class="modal-button"
+          >
+            ⏭️ 次のステージへ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 祝福モーダル -->
+    <div id="congratulationsModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-title">🎉 おめでとうございます！ 🎉</div>
+        <div class="modal-message">
+          <strong>迷路をクリアしました！</strong><br />
+          素晴らしいプログラミングスキルです！
+        </div>
+        <div class="modal-buttons">
+          <button
+            id="playAgainButton"
+            class="modal-button modal-button-primary"
+          >
+            🔄 もう一度プレイ
+          </button>
+          <button
+            id="nextStageButton"
+            class="modal-button"
+            style="background-color: #2196f3; color: white"
+          >
+            ⏭️ 次のステージへ
+          </button>
+          <button
+            id="closeModalButton"
+            class="modal-button modal-button-secondary"
+          >
+            ✨ 閉じる
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ヒントモーダル -->
+    <div
+      id="hintModal"
+      style="
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 3000;
+        background: #fff8e1;
+        border: 2px solid #ffd600;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(255, 214, 0, 0.18);
+        padding: 32px 24px;
+        text-align: center;
+        min-width: 320px;
+        max-width: 90vw;
+      "
+    >
+      <img
+        id="hintImage"
+        src="practice1_hint.png"
+        alt="ヒント"
+        style="
+          max-width: 100%;
+          border: 2px solid #ffd600;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px #ffd600;
+        "
+      />
+      <div
+        style="
+          color: #ffd600;
+          font-weight: bold;
+          margin-top: 12px;
+          font-size: 1.2em;
+        "
+      >
+        「右を向く」のブロックを使おう！
+      </div>
+      <button
+        id="closeHintModal"
+        style="
+          margin-top: 18px;
+          background-color: #ffd600;
+          color: #fff;
+          border: none;
+          padding: 8px 24px;
+          border-radius: 8px;
+          font-size: 1em;
+          cursor: pointer;
+        "
+      >
+        閉じる
+      </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/blockly_compressed.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/blocks_compressed.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/javascript_compressed.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/msg/ja.js"></script>
+
+    <xml id="toolbox" style="display: none">
+      <block type="move_straight"></block>
+      <block type="turn_right"></block>
+      <block type="turn_left"></block>
+      <!-- <category name="制御" colour="120">
+
+            <block type="controls_if"></block>
+            <block type="controls_whileUntil"></block>
+        </category>
+        <category name="検出" colour="210">
+            <block type="can_move_up"></block>
+            <block type="can_move_down"></block>
+            <block type="can_move_left"></block>
+            <block type="can_move_right"></block>
+            <block type="is_at_goal"></block>
+        </category> -->
+      <!-- <category name="数学" colour="230">
+            <block type="math_number"></block>
+            <block type="math_arithmetic"></block>
+            <block type="math_compare"></block>
+        </category>
+        <category name="論理" colour="210">
+            <block type="logic_boolean"></block>
+            <block type="logic_operation"></block>
+            <block type="logic_negate"></block>
+        </category> -->
+    </xml>
+
+    <script>
+      // 進行方向に進めるか判定ブロック
+      Blockly.Blocks["can_move_straight"] = {
+        init: function () {
+          this.appendDummyInput().appendField("まっすぐ進める？");
+          this.setOutput(true, "Boolean");
+          this.setColour(210);
+          this.setTooltip("現在向いている方向に進めるか判定します");
+        },
+      };
+      Blockly.JavaScript["can_move_straight"] = function (block) {
+        return ["canMoveStraight()", Blockly.JavaScript.ORDER_FUNCTION_CALL];
+      };
+
+      Blockly.Blocks["can_move_left_dir"] = {
+        init: function () {
+          this.appendDummyInput().appendField("左に進める？");
+          this.setOutput(true, "Boolean");
+          this.setColour(210);
+          this.setTooltip("現在向いている方向の左側に進めるか判定します");
+        },
+      };
+      Blockly.JavaScript["can_move_left_dir"] = function (block) {
+        return ["canMoveLeftDir()", Blockly.JavaScript.ORDER_FUNCTION_CALL];
+      };
+
+      Blockly.Blocks["can_move_right_dir"] = {
+        init: function () {
+          this.appendDummyInput().appendField("右に進める？");
+          this.setOutput(true, "Boolean");
+          this.setColour(210);
+          this.setTooltip("現在向いている方向の右側に進めるか判定します");
+        },
+      };
+      Blockly.JavaScript["can_move_right_dir"] = function (block) {
+        return ["canMoveRightDir()", Blockly.JavaScript.ORDER_FUNCTION_CALL];
+      };
+
+      // 進行方向判定関数
+      function canMoveStraight() {
+        let dx = 0,
+          dy = 0;
+        if (playerDirection === DIRECTION.UP) dy = -1;
+        else if (playerDirection === DIRECTION.RIGHT) dx = 1;
+        else if (playerDirection === DIRECTION.DOWN) dy = 1;
+        else if (playerDirection === DIRECTION.LEFT) dx = -1;
+        return canMove(dx, dy);
+      }
+      function canMoveLeftDir() {
+        // 左回転
+        let dir = (playerDirection + 3) % 4;
+        let dx = 0,
+          dy = 0;
+        if (dir === DIRECTION.UP) dy = -1;
+        else if (dir === DIRECTION.RIGHT) dx = 1;
+        else if (dir === DIRECTION.DOWN) dy = 1;
+        else if (dir === DIRECTION.LEFT) dx = -1;
+        return canMove(dx, dy);
+      }
+      function canMoveRightDir() {
+        // 右回転
+        let dir = (playerDirection + 1) % 4;
+        let dx = 0,
+          dy = 0;
+        if (dir === DIRECTION.UP) dy = -1;
+        else if (dir === DIRECTION.RIGHT) dx = 1;
+        else if (dir === DIRECTION.DOWN) dy = 1;
+        else if (dir === DIRECTION.LEFT) dx = -1;
+        return canMove(dx, dy);
+      }
+      // 向きを変えるブロック
+      Blockly.Blocks["turn_right"] = {
+        init: function () {
+          this.appendDummyInput().appendField("↩️ 右を向く");
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(160);
+          this.setTooltip("プレイヤーが右に90度回ります");
+        },
+      };
+
+      Blockly.Blocks["turn_left"] = {
+        init: function () {
+          this.appendDummyInput().appendField("↪️ 左を向く");
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(160);
+          this.setTooltip("プレイヤーが左に90度回ります");
+        },
+      };
+
+      Blockly.JavaScript["turn_right"] = function (block) {
+        var id = block.id;
+        return `workspace.highlightBlock('${id}');\nawait sleep(150);\nawait turnRight();\nworkspace.highlightBlock(null);\n`;
+      };
+
+      Blockly.JavaScript["turn_left"] = function (block) {
+        var id = block.id;
+        return `workspace.highlightBlock('${id}');\nawait sleep(150);\nawait turnLeft();\nworkspace.highlightBlock(null);\n`;
+      };
+
+      // 向きを変える関数
+
+      async function turnRight() {
+        playerDirection = (playerDirection + 1) % 4;
+        game.draw();
+        await sleep(500);
+      }
+
+      async function turnLeft() {
+        playerDirection = (playerDirection + 3) % 4;
+        game.draw();
+        await sleep(500);
+      }
+
+      // 方向管理用定数
+      const DIRECTION = {
+        UP: 0,
+        RIGHT: 1,
+        DOWN: 2,
+        LEFT: 3,
+      };
+
+      // プレイヤーの向きを管理
+      let playerDirection = DIRECTION.LEFT;
+
+      // まっすぐ進むブロック
+      Blockly.Blocks["move_straight"] = {
+        init: function () {
+          this.appendDummyInput().appendField("⬆️ まっすぐ進む");
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(160);
+          this.setTooltip("現在向いている方向に1マス進みます");
+        },
+      };
+
+      Blockly.JavaScript["move_straight"] = function (block) {
+        var id = block.id;
+        return `workspace.highlightBlock('${id}');\nawait sleep(150);\nawait moveStraight();\nworkspace.highlightBlock(null);\n`;
+      };
+
+      // カスタムブロックの定義
+
+      // 移動ブロック
+      Blockly.Blocks["move_up"] = {
+        init: function () {
+          this.appendDummyInput().appendField("⬆️ 上へ移動");
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(160);
+          this.setTooltip("プレイヤーを上に移動させます");
+        },
+      };
+
+      Blockly.Blocks["move_down"] = {
+        init: function () {
+          this.appendDummyInput().appendField("⬇️ 下へ移動");
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(160);
+          this.setTooltip("プレイヤーを下に移動させます");
+        },
+      };
+
+      Blockly.Blocks["move_left"] = {
+        init: function () {
+          this.appendDummyInput().appendField("⬅️ 左へ移動");
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(160);
+          this.setTooltip("プレイヤーを左に移動させます");
+        },
+      };
+
+      Blockly.Blocks["move_right"] = {
+        init: function () {
+          this.appendDummyInput().appendField("➡️ 右へ移動");
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(160);
+          this.setTooltip("プレイヤーを右に移動させます");
+        },
+      };
+
+      // 検出ブロック
+      Blockly.Blocks["can_move_up"] = {
+        init: function () {
+          this.appendDummyInput().appendField("上に移動できる？");
+          this.setOutput(true, "Boolean");
+          this.setColour(210);
+          this.setTooltip("上に移動できるかどうかを判定します");
+        },
+      };
+
+      Blockly.Blocks["can_move_down"] = {
+        init: function () {
+          this.appendDummyInput().appendField("下に移動できる？");
+          this.setOutput(true, "Boolean");
+          this.setColour(210);
+          this.setTooltip("下に移動できるかどうかを判定します");
+        },
+      };
+
+      Blockly.Blocks["can_move_left"] = {
+        init: function () {
+          this.appendDummyInput().appendField("左に移動できる？");
+          this.setOutput(true, "Boolean");
+          this.setColour(210);
+          this.setTooltip("左に移動できるかどうかを判定します");
+        },
+      };
+
+      Blockly.Blocks["can_move_right"] = {
+        init: function () {
+          this.appendDummyInput().appendField("右に移動できる？");
+          this.setOutput(true, "Boolean");
+          this.setColour(210);
+          this.setTooltip("右に移動できるかどうかを判定します");
+        },
+      };
+
+      Blockly.Blocks["is_at_goal"] = {
+        init: function () {
+          this.appendDummyInput().appendField("ゴールに到達した？");
+          this.setOutput(true, "Boolean");
+          this.setColour(210);
+          this.setTooltip("ゴールに到達したかどうかを判定します");
+        },
+      };
+
+      // JavaScriptコード生成器の登録
+      Blockly.JavaScript["move_up"] = function (block) {
+        var id = block.id;
+        return `workspace.highlightBlock('${id}');\nawait sleep(150);\nawait movePlayer(0, -1);\nworkspace.highlightBlock(null);\n`;
+      };
+
+      Blockly.JavaScript["move_down"] = function (block) {
+        var id = block.id;
+        return `workspace.highlightBlock('${id}');\nawait sleep(150);\nawait movePlayer(0, 1);\nworkspace.highlightBlock(null);\n`;
+      };
+
+      Blockly.JavaScript["move_left"] = function (block) {
+        var id = block.id;
+        return `workspace.highlightBlock('${id}');\nawait sleep(150);\nawait movePlayer(-1, 0);\nworkspace.highlightBlock(null);\n`;
+      };
+
+      Blockly.JavaScript["move_right"] = function (block) {
+        var id = block.id;
+        return `workspace.highlightBlock('${id}');\nawait sleep(150);\nawait movePlayer(1, 0);\nworkspace.highlightBlock(null);\n`;
+      };
+
+      Blockly.JavaScript["can_move_up"] = function (block) {
+        return ["canMove(0, -1)", Blockly.JavaScript.ORDER_FUNCTION_CALL];
+      };
+
+      Blockly.JavaScript["can_move_down"] = function (block) {
+        return ["canMove(0, 1)", Blockly.JavaScript.ORDER_FUNCTION_CALL];
+      };
+
+      Blockly.JavaScript["can_move_left"] = function (block) {
+        return ["canMove(-1, 0)", Blockly.JavaScript.ORDER_FUNCTION_CALL];
+      };
+
+      Blockly.JavaScript["can_move_right"] = function (block) {
+        return ["canMove(1, 0)", Blockly.JavaScript.ORDER_FUNCTION_CALL];
+      };
+
+      Blockly.JavaScript["is_at_goal"] = function (block) {
+        return ["isAtGoal()", Blockly.JavaScript.ORDER_FUNCTION_CALL];
+      };
+
+      // Blocklyワークスペースの設定
+      const workspace = Blockly.inject("blocklyDiv", {
+        toolbox: document.getElementById("toolbox"),
+        // theme: 'modern',
+        grid: {
+          spacing: 20,
+          length: 3,
+          colour: "#ccc",
+          snap: true,
+        },
+        zoom: {
+          controls: true,
+          wheel: true,
+          startScale: 1.0,
+          maxScale: 3,
+          minScale: 0.3,
+          scaleSpeed: 1.2,
+        },
+        maxBlocks: 5,
+      });
+      window.workspace = workspace;
+
+      // 残りブロック数表示用関数
+      function updateBlockCount() {
+        const max = workspace.options.maxBlocks || 0;
+        const used = workspace.getAllBlocks(false).length;
+        const remain = max > 0 ? max - used : 0;
+        const label = document.getElementById("blockCountRemain");
+        if (label) {
+          label.textContent = `残りブロック数：${remain}`;
+        }
+      }
+      // 初期表示
+      updateBlockCount();
+      // ブロック追加・削除時に更新
+      workspace.addChangeListener(function (e) {
+        if (
+          e.type === Blockly.Events.BLOCK_CREATE ||
+          e.type === Blockly.Events.BLOCK_DELETE
+        ) {
+          updateBlockCount();
+        }
+      });
+
+      // 迷路ゲームクラス
+      class MazeGame {
+        constructor(canvas) {
+          this.canvas = canvas;
+          this.ctx = canvas.getContext("2d");
+          this.cellSize = 100;
+          this.cols = 5;
+          this.rows = 5;
+          // 迷路の定義（0: 通路, 1: 壁）
+          this.maze = [
+            [1, 1, 1, 1, 1],
+            [1, 0, 1, 1, 1],
+            [1, 0, 1, 1, 1],
+            [1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1],
+          ];
+          this.playerX = 3;
+          this.playerY = 3;
+          this.goalX = 1;
+          this.goalY = 1;
+          this.isRunning = false;
+          this.isComplete = false;
+          this.draw();
+        }
+        draw() {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          // 迷路を描画
+          for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+              const x = col * this.cellSize;
+              const y = row * this.cellSize;
+              if (this.maze[row][col] === 1) {
+                // 壁
+                this.ctx.fillStyle = "#333";
+                this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
+              } else {
+                // 通路
+                this.ctx.fillStyle = "#fff";
+                this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
+              }
+              // 格子線
+              this.ctx.strokeStyle = "#ccc";
+              this.ctx.lineWidth = 1;
+              this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
+            }
+          }
+          // ゴールを描画
+          this.ctx.fillStyle = "#ff4444";
+          this.ctx.beginPath();
+          this.ctx.arc(
+            this.goalX * this.cellSize + this.cellSize / 2,
+            this.goalY * this.cellSize + this.cellSize / 2,
+            this.cellSize / 3,
+            0,
+            2 * Math.PI
+          );
+          this.ctx.fill();
+          // プレイヤーを描画
+          this.ctx.save();
+          // プレイヤーの向きに応じて回転
+          this.ctx.translate(
+            this.playerX * this.cellSize + this.cellSize / 2,
+            this.playerY * this.cellSize + this.cellSize / 2
+          );
+          this.ctx.rotate((playerDirection * Math.PI) / 2);
+          this.ctx.fillStyle = "#4444ff";
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, this.cellSize / 3, 0, 2 * Math.PI);
+          this.ctx.fill();
+          // 向きを示す三角形
+          this.ctx.fillStyle = "#fff";
+          this.ctx.beginPath();
+          this.ctx.moveTo(0, -this.cellSize / 3 + 5);
+          this.ctx.lineTo(7, -this.cellSize / 3 + 18);
+          this.ctx.lineTo(-7, -this.cellSize / 3 + 18);
+          this.ctx.closePath();
+          this.ctx.fill();
+          this.ctx.restore();
+        }
+        canMove(x, y) {
+          return (
+            x >= 0 &&
+            x < this.cols &&
+            y >= 0 &&
+            y < this.rows &&
+            this.maze[y][x] === 0
+          );
+        }
+        movePlayer(dx, dy) {
+          const newX = this.playerX + dx;
+          const newY = this.playerY + dy;
+          if (this.canMove(newX, newY)) {
+            this.playerX = newX;
+            this.playerY = newY;
+            this.draw();
+            if (this.playerX === this.goalX && this.playerY === this.goalY) {
+              this.isComplete = true;
+              const nextBtn = document.getElementById("nextStageBtn");
+              if (nextBtn) nextBtn.style.display = "";
+              this.updateStatus(
+                "🎉 ゴール到達！おめでとうございます！",
+                "success"
+              );
+              setTimeout(() => {
+                showCongratulationsModal();
+              }, 500);
+            }
+            return true;
+          } else {
+            this.updateStatus("❌ 壁にぶつかりました", "error");
+            setTimeout(() => {
+              this.reset();
+            }, 5000);
+            return false;
+          }
+        }
+        reset() {
+          this.playerX = 3;
+          this.playerY = 3;
+          this.isComplete = false;
+          this.isRunning = false;
+          playerDirection = DIRECTION.LEFT;
+          this.draw();
+          this.updateStatus("ゲームをリセットしました", "info");
+        }
+        updateStatus(message, type = "info") {
+          const statusElement = document.getElementById("status");
+          statusElement.textContent = message;
+          statusElement.className = `status ${type}`;
+        }
+      }
+
+      // ゲームインスタンス
+      const game = new MazeGame(document.getElementById("gameCanvas"));
+
+      // ゲーム制御関数
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      async function movePlayer(dx, dy) {
+        if (!game.isRunning || game.isComplete) return;
+        // 向きを更新（移動方向に合わせる）
+        if (dx === 0 && dy === -1) playerDirection = DIRECTION.UP;
+        else if (dx === 1 && dy === 0) playerDirection = DIRECTION.RIGHT;
+        else if (dx === 0 && dy === 1) playerDirection = DIRECTION.DOWN;
+        else if (dx === -1 && dy === 0) playerDirection = DIRECTION.LEFT;
+        const success = game.movePlayer(dx, dy);
+        if (success) {
+          await sleep(150);
+        } else {
+          await sleep(250);
+          throw new Error("壁にぶつかりました");
+        }
+      }
+
+      // まっすぐ進む
+      async function moveStraight() {
+        if (!game.isRunning || game.isComplete) return;
+        let dx = 0,
+          dy = 0;
+        if (playerDirection === DIRECTION.UP) dy = -1;
+        else if (playerDirection === DIRECTION.RIGHT) dx = 1;
+        else if (playerDirection === DIRECTION.DOWN) dy = 1;
+        else if (playerDirection === DIRECTION.LEFT) dx = -1;
+        await movePlayer(dx, dy);
+      }
+
+      function canMove(dx, dy) {
+        const newX = game.playerX + dx;
+        const newY = game.playerY + dy;
+        return game.canMove(newX, newY);
+      }
+
+      function isAtGoal() {
+        return game.playerX === game.goalX && game.playerY === game.goalY;
+      }
+
+      // 祝福モーダル関連の関数
+      function showCongratulationsModal() {
+        const modal = document.getElementById("congratulationsModal");
+        modal.style.display = "block";
+        createConfetti();
+      }
+
+      function hideCongratulationsModal() {
+        const modal = document.getElementById("congratulationsModal");
+        modal.style.display = "none";
+        // 既存の紙吹雪を削除
+        const confetti = document.querySelectorAll(".confetti");
+        confetti.forEach((piece) => piece.remove());
+      }
+
+      function createConfetti() {
+        const colors = [
+          "#FFD700",
+          "#FF6B6B",
+          "#4ECDC4",
+          "#45B7D1",
+          "#96CEB4",
+          "#FFEAA7",
+          "#DDA0DD",
+          "#98D8C8",
+        ];
+
+        for (let i = 0; i < 50; i++) {
+          setTimeout(() => {
+            const confetti = document.createElement("div");
+            confetti.className = "confetti";
+            confetti.style.left = Math.random() * 100 + "%";
+            confetti.style.backgroundColor =
+              colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = Math.random() * 3 + "s";
+            confetti.style.animationDuration = Math.random() * 3 + 2 + "s";
+            document.body.appendChild(confetti);
+
+            // 3秒後に削除
+            setTimeout(() => {
+              if (confetti.parentNode) {
+                confetti.parentNode.removeChild(confetti);
+              }
+            }, 5000);
+          }, i * 100);
+        }
+      }
+
+      // ボタンイベント
+      document
+        .getElementById("runButton")
+        .addEventListener("click", async () => {
+          if (game.isRunning) return;
+          // 実行時は「次のステージへ」ボタン非表示
+          const nextBtn = document.getElementById("nextStageBtn");
+          if (nextBtn) nextBtn.style.display = "none";
+
+          // 右パネルが非表示なら表示する
+          const rightPanel = document.querySelector(".right-panel");
+          const leftPanel = document.querySelector(".left-panel");
+          const container = document.querySelector(".container");
+          const toggleButton = document.getElementById("toggleBlocksButton");
+          if (rightPanel && rightPanel.style.display === "none") {
+            rightPanel.style.display = "";
+            rightPanel.style.position = "";
+            rightPanel.style.left = "";
+            leftPanel.style.flexBasis = "";
+            leftPanel.style.maxWidth = "";
+            leftPanel.style.width = "";
+            container.style.gap = "";
+            container.style.maxWidth = "";
+            container.style.margin = "";
+            toggleButton.textContent = "❌";
+            toggleButton.title = "ゲーム画面を非表示";
+          }
+
+          game.isRunning = true;
+          game.updateStatus("🚀 プログラムを実行中...", "info");
+
+          const runButton = document.getElementById("runButton");
+          runButton.disabled = true;
+          runButton.textContent = "実行中...";
+
+          try {
+            const code = Blockly.JavaScript.workspaceToCode(workspace);
+            console.log("Generated Code:", code);
+            // 非同期関数として実行
+            const asyncFunction = new Function(
+              "return (async () => { " + code + " })()"
+            );
+            await asyncFunction();
+            if (!game.isComplete) {
+              game.updateStatus("プログラムが完了しました", "info");
+            }
+          } catch (error) {
+            if (error && error.message === "壁にぶつかりました") {
+              // 壁にぶつかった場合はリセットのみ（エラーメッセージは上書きしない）
+              setTimeout(() => {
+                game.reset();
+              }, 2000);
+            } else {
+              console.error("実行エラー:", error);
+              game.updateStatus(
+                "❌ プログラムの実行中にエラーが発生しました",
+                "error"
+              );
+            }
+          } finally {
+            game.isRunning = false;
+            runButton.disabled = false;
+            runButton.textContent = "🚀 コードを実行";
+          }
+        });
+
+      document.getElementById("resetButton").addEventListener("click", () => {
+        game.reset();
+        playerDirection = DIRECTION.LEFT;
+        // リセット時は「次のステージへ」ボタン非表示
+        const nextBtn = document.getElementById("nextStageBtn");
+        if (nextBtn) nextBtn.style.display = "none";
+      });
+
+      // ヒント表示/非表示関数（サブウィンドウ型）
+      function showHint() {
+        const hintModal = document.getElementById("hintModal");
+        if (hintModal) hintModal.style.display = "";
+      }
+      function hideHint() {
+        const hintModal = document.getElementById("hintModal");
+        if (hintModal) hintModal.style.display = "none";
+      }
+      document
+        .getElementById("toggleBlocksButton")
+        .addEventListener("click", () => {
+          const rightPanel = document.querySelector(".right-panel");
+          const leftPanel = document.querySelector(".left-panel");
+          const container = document.querySelector(".container");
+          const toggleButton = document.getElementById("toggleBlocksButton");
+          const isHidden = rightPanel.style.display === "none";
+
+          if (isHidden) {
+            // ゲーム画面を表示
+            rightPanel.style.display = "";
+            rightPanel.style.position = "";
+            rightPanel.style.left = "";
+            leftPanel.style.flexBasis = "";
+            leftPanel.style.maxWidth = "";
+            leftPanel.style.width = "";
+            container.style.gap = "";
+            container.style.maxWidth = "";
+            container.style.margin = "";
+            toggleButton.textContent = "❌";
+            toggleButton.title = "ゲーム画面を非表示";
+          } else {
+            // ゲーム画面を非表示、左パネルを広げる
+            rightPanel.style.display = "none";
+            rightPanel.style.position = "absolute";
+            rightPanel.style.left = "-9999px";
+            leftPanel.style.flexBasis = "100%";
+            leftPanel.style.maxWidth = "100%";
+            leftPanel.style.width = "200%";
+            container.style.gap = "0";
+            container.style.maxWidth = "100%";
+            container.style.margin = "0";
+            toggleButton.textContent = "🎯";
+            toggleButton.title = "ゲーム画面を表示";
+          }
+
+          // 重要: 描画の直後にリサイズ (一瞬待つ)
+          setTimeout(() => {
+            if (window.workspace && Blockly) {
+              Blockly.svgResize(window.workspace);
+            }
+          }, 0);
+        });
+
+      // モーダルのイベントリスナー
+      // 「次のステージへ」ボタンのクリックで次のステージへ
+      document.getElementById("nextStageBtn").addEventListener("click", () => {
+        window.location.href = "practice2.html";
+      });
+      document
+        .getElementById("playAgainButton")
+        .addEventListener("click", () => {
+          hideCongratulationsModal();
+          game.reset();
+          if (window.workspace) {
+            window.workspace.clear();
+          }
+        });
+      document
+        .getElementById("nextStageButton")
+        .addEventListener("click", () => {
+          window.location.href = "practice2.html";
+        });
+      document
+        .getElementById("closeModalButton")
+        .addEventListener("click", () => {
+          hideCongratulationsModal();
+        });
+      // モーダルの外側をクリックしたときに閉じる
+      document
+        .getElementById("congratulationsModal")
+        .addEventListener("click", (e) => {
+          if (e.target === document.getElementById("congratulationsModal")) {
+            hideCongratulationsModal();
+          }
+        });
+
+      // 初期メッセージ
+      game.updateStatus(
+        "ブロックを組み立てて、青い点を赤い点まで移動させよう！",
+        "info"
+      );
+      // ホームボタンのイベント
+      const homeBtn = document.getElementById("homeButton");
+      if (homeBtn) {
+        homeBtn.addEventListener("click", () => {
+          window.location.href = "top.html?from=practice10";
+        });
+      }
+    </script>
+    <script>
+      // BGMをJavaScriptで制御
+      window.addEventListener("DOMContentLoaded", function () {
+        const audio = document.getElementById("bgmAudio");
+        if (audio) {
+          audio.volume = 0.5;
+          // 自動再生を試みる
+          audio.play().catch(() => {
+            // ユーザー操作が必要な場合は、最初のクリックで再生
+            const playBGM = () => {
+              audio.play().catch(() => {});
+              document.removeEventListener("click", playBGM);
+            };
+            document.addEventListener("click", playBGM);
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
